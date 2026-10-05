@@ -42,10 +42,53 @@ def get_challenges(db: Session = Depends(get_db)):
         ch = db.query(models.Challenge).all()
     return ch
 
+@router.post("/challenges/{challenge_id}/complete")
+def complete_challenge(challenge_id: int, db: Session = Depends(get_db)):
+    ch = db.query(models.Challenge).filter(models.Challenge.id == challenge_id).first()
+    if not ch:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    if ch.status != "Completed":
+        ch.progress += 1
+        if ch.progress >= ch.target:
+            ch.status = "Completed"
+            # Add XP to user
+            user = db.query(models.User).first()
+            if user:
+                user.xp += ch.xp_reward
+        db.commit()
+    
+    return ch
+
 @router.post("/ai/plan")
 def ai_plan(req: AIChatRequest):
     return ai_service.generate_plan(context_data={}, user_message=req.message)
 
+class StudySessionRequest(BaseModel):
+    duration_seconds: int
+
+@router.post("/study-session")
+def record_study_session(req: StudySessionRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).first()
+    if user:
+        minutes = req.duration_seconds // 60
+        user.xp += minutes * 10
+        db.commit()
+        return {"message": "success", "xp_earned": minutes * 10, "total_xp": user.xp}
+    return {"message": "user not found"}
+
 @router.get("/insights")
 def get_insights():
     return ai_service.analyze_routine(user_id=1)
+
+@router.get("/profile")
+def get_profile(db: Session = Depends(get_db)):
+    user = db.query(models.User).first()
+    return {
+        "user": {"name": user.name, "level": user.level, "xp": user.xp},
+        "settings": {
+            "study_window": "7 PM - 10 PM",
+            "target_bedtime": "11:30 PM",
+            "target_wake": "7:30 AM"
+        }
+    }

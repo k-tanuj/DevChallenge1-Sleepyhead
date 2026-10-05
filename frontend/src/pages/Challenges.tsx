@@ -1,12 +1,54 @@
-import { Target, Clock, Zap, CheckCircle2, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Target, CheckCircle2, ChevronRight } from 'lucide-react';
+
+interface ChallengeData {
+  id: string | int;
+  title: string;
+  description: string;
+  progress: number;
+  target: number;
+  xp_reward: number;
+  difficulty: string;
+  status: string;
+  color?: string;
+}
 
 export default function Challenges() {
-  const challenges = [
-    { id: '042', title: 'Sleep Before 11:45 PM', desc: 'Complete your wind-down routine and be in bed before your target bedtime.', progress: 4, total: 7, xp: 50, diff: 'Easy', status: 'Active', color: 'bg-primary' },
-    { id: '043', title: 'Focused Study Session', desc: 'Complete a highly focused study session without checking your phone.', progress: 3, total: 5, xp: 75, diff: 'Medium', status: 'Active', color: 'bg-blue-500' },
-    { id: '044', title: 'Wake Within Target Window', desc: 'Wake up between 7:00 AM and 7:30 AM without hitting snooze.', progress: 5, total: 7, xp: 50, diff: 'Easy', status: 'Active', color: 'bg-yellow-500' },
-    { id: '045', title: 'Protect Bedtime', desc: 'Stop studying at least 45 minutes before your planned bedtime.', progress: 1, total: 1, xp: 100, diff: 'Hard', status: 'Completed', color: 'bg-green-500' },
-  ];
+  const [challenges, setChallenges] = useState<ChallengeData[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/challenges')
+      .then(r => r.json())
+      .then(data => {
+        // Map backend data to frontend colors
+        const mapped = data.map((c: any, i: number) => ({
+          ...c,
+          id: c.id.toString(),
+          desc: c.description,
+          total: c.target,
+          xp: c.xp_reward,
+          diff: c.difficulty,
+          color: i % 2 === 0 ? 'bg-primary' : 'bg-blue-500'
+        }));
+        setChallenges(mapped);
+      });
+  }, []);
+
+  const completeChallenge = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/challenges/${id}/complete`, { method: 'POST' });
+      const updated = await res.json();
+      
+      setChallenges(prev => prev.map(c => {
+        if (c.id === id) {
+          return { ...c, progress: updated.progress, status: updated.status, color: updated.status === 'Completed' ? 'bg-green-500' : c.color };
+        }
+        return c;
+      }));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8 h-full">
@@ -31,7 +73,7 @@ export default function Challenges() {
             
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
-                <span className={`px-2 py-1 ${c.status === 'Completed' ? 'bg-green-500/20 text-green-400' : 'bg-primary/20 text-primary'} text-[10px] font-bold rounded uppercase tracking-wider`}>
+                <span className={`px-2 py-1 ${c.status === 'Completed' ? 'bg-green-500/20 text-green-400' : 'bg-primary/20 text-primary'} text-[10px] font-bold rounded uppercase tracking-wider transition-colors`}>
                   #{c.id} • +{c.xp} XP
                 </span>
                 {c.status === 'Completed' ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Target className="w-5 h-5 text-text-muted" />}
@@ -46,10 +88,13 @@ export default function Challenges() {
                   <span>{c.progress} / {c.total}</span>
                 </div>
                 <div className="w-full h-2 bg-background rounded-full overflow-hidden mb-4">
-                  <div className={`h-full ${c.color} rounded-full`} style={{ width: `${(c.progress / c.total) * 100}%` }}></div>
+                  <div className={`h-full ${c.color} rounded-full transition-all duration-500`} style={{ width: `${(c.progress / c.total) * 100}%` }}></div>
                 </div>
                 
-                <button className={`w-full py-3 rounded-xl flex justify-center items-center gap-2 font-bold text-sm transition-colors ${c.status === 'Completed' ? 'bg-surface-active text-text-muted cursor-default' : 'bg-white text-background hover:bg-white/90'}`}>
+                <button 
+                  onClick={() => completeChallenge(c.id)}
+                  className={`w-full py-3 rounded-xl flex justify-center items-center gap-2 font-bold text-sm transition-colors ${c.status === 'Completed' ? 'bg-surface-active text-text-muted cursor-default' : 'bg-white text-background hover:bg-white/90'}`}
+                >
                   {c.status === 'Completed' ? 'Completed' : 'Complete Challenge'}
                   {c.status !== 'Completed' && <ChevronRight className="w-4 h-4" />}
                 </button>

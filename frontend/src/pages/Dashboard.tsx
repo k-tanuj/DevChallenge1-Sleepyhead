@@ -1,13 +1,79 @@
-import { Search, Bell, ShoppingCart, Flame, BookOpen, Wind, Moon, Star, Leaf } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Bell, ShoppingCart, Flame, BookOpen, Wind, Moon, Star, Leaf, ChevronRight, Square } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const [data, setData] = useState<any>(null);
+  const navigate = useNavigate();
+  
+  // Timer State
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [sessionTime, setSessionTime] = useState(0);
+  const timerRef = useRef<any>(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/dashboard')
+      .then(r => r.json())
+      .then(setData)
+      .catch(console.error);
+      
+    // Cleanup timer on unmount
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const toggleSession = async () => {
+    if (isSessionActive) {
+      // Stop
+      if (timerRef.current) clearInterval(timerRef.current);
+      setIsSessionActive(false);
+      const seconds = sessionTime;
+      const minutes = Math.floor(seconds / 60);
+      
+      try {
+        const res = await fetch('http://localhost:8000/api/study-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration_seconds: seconds })
+        });
+        const result = await res.json();
+        
+        // Refresh dashboard data to show new XP
+        fetch('http://localhost:8000/api/dashboard')
+          .then(r => r.json())
+          .then(setData);
+
+        alert(`Study session recorded! You stayed focused for ${minutes} min ${seconds % 60} sec. (+${result.xp_earned} XP)`);
+      } catch (e) {
+        console.error(e);
+      }
+      
+      setSessionTime(0);
+    } else {
+      // Start
+      setIsSessionActive(true);
+      timerRef.current = setInterval(() => {
+        setSessionTime(prev => prev + 1);
+      }, 1000);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  if (!data) return <div className="h-full flex items-center justify-center text-text-muted">Loading...</div>;
+
   return (
     <div className="flex flex-col gap-8 h-full">
       {/* Top Header */}
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-light text-text-muted">
-            Good evening, <span className="text-white font-semibold uppercase">Tanuj</span>
+            Good evening, <span className="text-white font-semibold uppercase">{data.user.name}</span>
           </h1>
         </div>
         
@@ -21,7 +87,7 @@ export default function Dashboard() {
             />
           </div>
           
-          <button className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-white hover:bg-surface-hover transition-colors relative">
+          <button onClick={() => alert("No new notifications")} className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-white hover:bg-surface-hover transition-colors relative active:scale-95">
             <Bell className="w-4 h-4" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
           </button>
@@ -52,11 +118,24 @@ export default function Dashboard() {
                 You've got 55 minutes of study remaining. Finish one focused session tonight and avoid pushing the remaining work past your planned bedtime of 11:30 PM.
               </p>
               
-              <div className="flex items-center gap-4 mt-auto">
-                <button className="bg-white text-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-white/90 transition-colors shadow-lg">
-                  Start Study Session
+              <div className="flex items-center gap-4 mt-auto flex-wrap">
+                <button 
+                  onClick={toggleSession}
+                  className={`${isSessionActive ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white text-primary hover:bg-white/90'} px-6 py-3 rounded-xl font-bold text-sm transition-colors shadow-lg active:scale-95 flex items-center gap-2 w-48 justify-center`}
+                >
+                  {isSessionActive ? (
+                    <>
+                      <Square className="w-4 h-4" fill="currentColor" /> {formatTime(sessionTime)}
+                    </>
+                  ) : 'Start Study Session'}
                 </button>
-                <div className="flex -space-x-3">
+                <button 
+                  onClick={() => navigate('/coach')}
+                  className="bg-surface-active text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-hover transition-colors shadow-lg border border-border/50 active:scale-95"
+                >
+                  Plan Tomorrow
+                </button>
+                <div className="flex -space-x-3 ml-auto hidden sm:flex">
                   <div className="w-10 h-10 rounded-full border-2 border-primary bg-surface-active flex items-center justify-center text-xs">
                     <BookOpen className="w-5 h-5 text-text-muted" />
                   </div>
@@ -75,13 +154,13 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white">Daily Challenges</h3>
-              <button className="text-text-muted text-sm hover:text-primary transition-colors">See All</button>
+              <button onClick={() => navigate('/challenges')} className="text-text-muted text-sm hover:text-primary transition-colors active:scale-95">See All</button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Challenge Card 1 */}
               <div className="bg-surface p-6 rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-                <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors cursor-pointer z-10">
+                <div onClick={() => navigate('/challenges')} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors cursor-pointer z-10 active:scale-95">
                   <span className="font-bold">+</span>
                 </div>
                 
@@ -105,7 +184,7 @@ export default function Dashboard() {
 
               {/* Challenge Card 2 */}
               <div className="bg-surface p-6 rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-                <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors cursor-pointer z-10">
+                <div onClick={() => navigate('/challenges')} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors cursor-pointer z-10 active:scale-95">
                   <span className="font-bold">+</span>
                 </div>
                 
@@ -133,7 +212,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">Your Routine Stats</h3>
-            <button className="text-text-muted text-sm hover:text-white transition-colors">➔</button>
+            <button onClick={() => navigate('/contributions')} className="text-text-muted text-sm hover:text-white transition-colors active:scale-95">➔</button>
           </div>
           
           <div className="bg-gradient-to-b from-surface to-background p-6 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden h-[400px]">
@@ -145,9 +224,9 @@ export default function Dashboard() {
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary via-orange-400 to-purple-500 animate-pulse opacity-50 blur-md mix-blend-screen"></div>
               <div className="absolute inset-2 rounded-full bg-surface-active z-10 flex flex-col items-center justify-center shadow-inner">
                 <span className="text-text-muted text-sm mb-1">Total Streak</span>
-                <span className="text-4xl font-bold text-white">12 Days</span>
+                <span className="text-4xl font-bold text-white">{data.streak.current} Days</span>
                 <span className="text-primary text-xs font-bold mt-2 flex items-center gap-1">
-                  <Flame className="w-3 h-3" /> Best: 18
+                  <Flame className="w-3 h-3" /> Best: {data.streak.best}
                 </span>
               </div>
               {/* Outer decorative ring */}
@@ -174,7 +253,7 @@ export default function Dashboard() {
                 <div className="w-12 h-12 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center mb-2 shadow-lg shadow-purple-500/10">
                   <Star className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold text-white">820</span>
+                <span className="text-xs font-bold text-white">{data.user.xp}</span>
                 <span className="text-[10px] text-text-muted">Total XP</span>
               </div>
             </div>

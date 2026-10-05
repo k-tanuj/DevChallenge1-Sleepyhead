@@ -43,7 +43,7 @@ export default function Sidebar() {
         </nav>
       </div>
       
-      <button className="w-12 h-12 rounded-full border border-dashed border-text-muted flex items-center justify-center text-text-muted hover:text-white hover:border-white transition-colors mt-auto">
+      <button onClick={() => alert("Create Custom Challenge: Coming Soon!")} className="w-12 h-12 rounded-full border border-dashed border-text-muted flex items-center justify-center text-text-muted hover:text-white hover:border-white transition-colors mt-auto active:scale-95">
         <Plus className="w-5 h-5" />
       </button>
     </aside>

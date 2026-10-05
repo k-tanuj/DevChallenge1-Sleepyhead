@@ -1,6 +1,17 @@
+import { useState, useEffect } from 'react';
 import { LogOut, Settings, Bell, Shield, Smartphone, CheckCircle2 } from 'lucide-react';
 
 export default function Profile() {
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/profile')
+      .then(r => r.json())
+      .then(setData);
+  }, []);
+
+  if (!data) return <div className="h-full flex items-center justify-center text-text-muted">Loading...</div>;
+
   return (
     <div className="flex flex-col gap-8 h-full max-w-4xl mx-auto w-full">
       <header className="flex items-center justify-between">
@@ -20,22 +31,22 @@ export default function Profile() {
             <div className="w-24 h-24 rounded-full bg-primary/20 border-4 border-surface z-10 mb-4 flex items-center justify-center overflow-hidden">
                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tanuj" alt="Tanuj" className="w-full h-full object-cover" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-1 relative z-10">Tanuj</h2>
-            <p className="text-primary font-semibold text-sm mb-6 relative z-10">Level 8 Maintainer</p>
+            <h2 className="text-2xl font-bold text-white mb-1 relative z-10">{data.user.name}</h2>
+            <p className="text-primary font-semibold text-sm mb-6 relative z-10">Level {data.user.level} Maintainer</p>
             
             <div className="w-full h-1.5 bg-background rounded-full mb-2">
                <div className="h-full bg-primary w-[75%] rounded-full"></div>
             </div>
             <div className="flex justify-between w-full text-xs font-bold text-text-muted uppercase tracking-wider mb-8">
-               <span>820 XP</span>
+               <span>{data.user.xp} XP</span>
                <span>1000 XP (Lvl 9)</span>
             </div>
 
             <div className="w-full flex flex-col gap-2 relative z-10">
-              <button className="w-full py-3 bg-surface-active text-white rounded-xl text-sm font-medium hover:bg-surface-hover transition-colors flex items-center justify-center gap-2">
+              <button onClick={() => alert("Edit Profile Modal Opened")} className="w-full py-3 bg-surface-active text-white rounded-xl text-sm font-medium hover:bg-surface-hover transition-colors flex items-center justify-center gap-2 active:scale-95">
                 <Settings className="w-4 h-4" /> Edit Profile
               </button>
-              <button className="w-full py-3 bg-transparent text-text-muted rounded-xl text-sm font-medium hover:text-primary transition-colors flex items-center justify-center gap-2">
+              <button onClick={() => alert("Signed Out")} className="w-full py-3 bg-transparent text-text-muted rounded-xl text-sm font-medium hover:text-primary transition-colors flex items-center justify-center gap-2 active:scale-95">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </div>
