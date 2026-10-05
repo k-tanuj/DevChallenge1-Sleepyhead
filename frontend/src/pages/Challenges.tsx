@@ -17,7 +17,7 @@ export default function Challenges() {
   const [challenges, setChallenges] = useState<ChallengeData[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/challenges')
+    fetch('https://devchallenge1-sleepyhead.onrender.com/api/challenges')
       .then(r => r.json())
       .then(data => {
         // Map backend data to frontend colors
@@ -36,7 +36,7 @@ export default function Challenges() {
 
   const completeChallenge = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/challenges/${id}/complete`, { method: 'POST' });
+      const res = await fetch(`https://devchallenge1-sleepyhead.onrender.com/api/challenges/${id}/complete`, { method: 'POST' });
       const updated = await res.json();
       
       setChallenges(prev => prev.map(c => {

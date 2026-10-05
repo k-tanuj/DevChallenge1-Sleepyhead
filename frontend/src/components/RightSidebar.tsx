@@ -8,12 +8,12 @@ export default function RightSidebar() {
   const [challenges, setChallenges] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/dashboard')
+    fetch('https://devchallenge1-sleepyhead.onrender.com/api/dashboard')
       .then(r => r.json())
       .then(setData)
       .catch(console.error);
       
-    fetch('http://localhost:8000/api/challenges')
+    fetch('https://devchallenge1-sleepyhead.onrender.com/api/challenges')
       .then(r => r.json())
       .then(data => {
         const active = data.filter((c: any) => c.status === 'Active').slice(0, 3);

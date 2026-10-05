@@ -14,7 +14,7 @@ export default function AICoach() {
     setInput('');
     
     try {
-      const res = await fetch('http://localhost:8000/api/ai/plan', {
+      const res = await fetch('https://devchallenge1-sleepyhead.onrender.com/api/ai/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: sentInput })

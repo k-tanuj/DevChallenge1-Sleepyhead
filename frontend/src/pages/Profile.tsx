@@ -5,7 +5,7 @@ export default function Profile() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/profile')
+    fetch('https://devchallenge1-sleepyhead.onrender.com/api/profile')
       .then(r => r.json())
       .then(setData);
   }, []);

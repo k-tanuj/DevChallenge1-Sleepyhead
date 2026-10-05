@@ -12,7 +12,7 @@ export default function Dashboard() {
   const timerRef = useRef<any>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/dashboard')
+    fetch('https://devchallenge1-sleepyhead.onrender.com/api/dashboard')
       .then(r => r.json())
       .then(setData)
       .catch(console.error);
@@ -32,7 +32,7 @@ export default function Dashboard() {
       const minutes = Math.floor(seconds / 60);
       
       try {
-        const res = await fetch('http://localhost:8000/api/study-session', {
+        const res = await fetch('https://devchallenge1-sleepyhead.onrender.com/api/study-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ duration_seconds: seconds })
@@ -40,7 +40,7 @@ export default function Dashboard() {
         const result = await res.json();
         
         // Refresh dashboard data to show new XP
-        fetch('http://localhost:8000/api/dashboard')
+        fetch('https://devchallenge1-sleepyhead.onrender.com/api/dashboard')
           .then(r => r.json())
           .then(setData);
 
