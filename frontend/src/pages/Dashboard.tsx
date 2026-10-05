@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, ShoppingCart, Flame, BookOpen, Wind, Moon, Star, Leaf, ChevronRight, Square } from 'lucide-react';
+import { Search, Bell, Flame, BookOpen, Wind, Moon, Star, Leaf, Square } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {

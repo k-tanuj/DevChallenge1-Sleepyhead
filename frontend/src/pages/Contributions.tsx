@@ -70,7 +70,7 @@ export default function Contributions() {
              {/* Creating column-major grid mockup for the last 90 days */}
              {Array.from({ length: 13 }).map((_, weekIndex) => (
                 <div key={weekIndex} className="flex flex-col gap-2">
-                  {contributions.slice(weekIndex * 7, (weekIndex + 1) * 7).map((c, i) => (
+                  {contributions.slice(weekIndex * 7, (weekIndex + 1) * 7).map((c) => (
                     <div 
                       key={c.date} 
                       className={`w-4 h-4 md:w-5 md:h-5 rounded-sm ${levelColors[c.level]} border border-background hover:border-white transition-colors cursor-pointer relative group`}

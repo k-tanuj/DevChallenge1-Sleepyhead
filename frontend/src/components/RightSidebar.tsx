@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, Moon, BookOpen, Sunrise, Target } from 'lucide-react';
+import { MessageCircle, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function RightSidebar() {

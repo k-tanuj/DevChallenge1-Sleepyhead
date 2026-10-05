@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogOut, Settings, Bell, Shield, Smartphone, CheckCircle2 } from 'lucide-react';
+import { LogOut, Settings, Shield, CheckCircle2 } from 'lucide-react';
 
 export default function Profile() {
   const [data, setData] = useState<any>(null);

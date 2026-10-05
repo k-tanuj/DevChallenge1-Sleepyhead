@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Target, CheckCircle2, ChevronRight } from 'lucide-react';
 
 interface ChallengeData {
-  id: string | int;
+  id: string | number;
   title: string;
   description: string;
   progress: number;
@@ -74,25 +74,25 @@ export default function Challenges() {
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
                 <span className={`px-2 py-1 ${c.status === 'Completed' ? 'bg-green-500/20 text-green-400' : 'bg-primary/20 text-primary'} text-[10px] font-bold rounded uppercase tracking-wider transition-colors`}>
-                  #{c.id} • +{c.xp} XP
+                  #{c.id} • +{c.xp_reward} XP
                 </span>
                 {c.status === 'Completed' ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Target className="w-5 h-5 text-text-muted" />}
               </div>
               
               <h4 className="text-xl font-bold text-white mb-2 leading-tight">{c.title}</h4>
-              <p className="text-text-muted text-sm mb-6 flex-1">{c.desc}</p>
+              <p className="text-text-muted text-sm mb-6 flex-1">{c.description}</p>
               
               <div className="mt-auto">
                 <div className="flex justify-between text-xs text-white font-medium mb-2">
                   <span>Progress</span>
-                  <span>{c.progress} / {c.total}</span>
+                  <span>{c.progress} / {c.target}</span>
                 </div>
                 <div className="w-full h-2 bg-background rounded-full overflow-hidden mb-4">
-                  <div className={`h-full ${c.color} rounded-full transition-all duration-500`} style={{ width: `${(c.progress / c.total) * 100}%` }}></div>
+                  <div className={`h-full ${c.color} rounded-full transition-all duration-500`} style={{ width: `${(c.progress / c.target) * 100}%` }}></div>
                 </div>
                 
                 <button 
-                  onClick={() => completeChallenge(c.id)}
+                  onClick={() => completeChallenge(c.id as string)}
                   className={`w-full py-3 rounded-xl flex justify-center items-center gap-2 font-bold text-sm transition-colors ${c.status === 'Completed' ? 'bg-surface-active text-text-muted cursor-default' : 'bg-white text-background hover:bg-white/90'}`}
                 >
                   {c.status === 'Completed' ? 'Completed' : 'Complete Challenge'}
